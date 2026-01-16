@@ -1,0 +1,64 @@
+﻿@model TravelGuideMvc.ViewModels.NearbyCardVm
+@using System.Globalization
+
+@functions {
+    string MapsSearchUrl(double lat, double lng)
+    {
+        var la = lat.ToString(CultureInfo.InvariantCulture);
+        var lo = lng.ToString(CultureInfo.InvariantCulture);
+        return $"https://www.google.com/maps/search/?api=1&query={la},{lo}";
+    }
+
+    string DirectionsUrl(double lat, double lng)
+    {
+        var la = lat.ToString(CultureInfo.InvariantCulture);
+        var lo = lng.ToString(CultureInfo.InvariantCulture);
+        return $"https://www.google.com/maps/dir/?api=1&destination={la},{lo}";
+    }
+}
+
+<div style="border:1px solid #ddd; border-radius:12px; padding:14px; background:#fff;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <div style="font-size:22px;">@Model.Icon</div>
+        <h4 style="margin:0;">@Model.Title</h4>
+    </div>
+
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <p style="margin:0; color:#666;">No results found.</p>
+    }
+    else
+    {
+        <ul style="margin:0; padding-left:18px;">
+            @foreach (var sp in Model.Items)
+            {
+                var spMaps = MapsSearchUrl(sp.Latitude, sp.Longitude);
+                var spDir = DirectionsUrl(sp.Latitude, sp.Longitude);
+
+                <li style="margin-bottom:12px;">
+                    <div>
+                        <strong>@sp.Name</strong>
+                        <span style="margin-left:8px; font-size:12px; background:#f2f2f2; padding:2px 8px; border-radius:999px;">
+                            @sp.Type
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(sp.Address))
+                    {
+                        <div style="color:gray;">@sp.Address</div>
+                    }
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                        <a href="@spMaps" target="_blank" rel="noopener noreferrer">📍 Map</a>
+                        <a href="@spDir" target="_blank" rel="noopener noreferrer">🧭 Directions</a>
+
+                        @if (Model.ShowPhone && !string.IsNullOrWhiteSpace(sp.Phone))
+                        {
+                            <a href="tel:@sp.Phone">📞 Call</a>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

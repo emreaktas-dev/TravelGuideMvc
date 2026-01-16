@@ -1,0 +1,53 @@
+﻿@model TravelGuideMvc.ViewModels.ExploreVm
+
+<h1>Explore Kyrgyzstan</h1>
+
+<form method="get" class="mb-4">
+    <select name="cityId">
+        <option value="">All Cities</option>
+        @foreach (var city in Model.Cities)
+        {
+            <option value="@city.Id" selected="@(city.Id == Model.SelectedCityId)">
+                @city.Name
+            </option>
+        }
+    </select>
+
+    <select name="categoryId">
+        <option value="">All Categories</option>
+        @foreach (var cat in Model.Categories)
+        {
+            <option value="@cat.Id" selected="@(cat.Id == Model.SelectedCategoryId)">
+                @cat.Name
+            </option>
+        }
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+<hr />
+
+<div>
+    @if (!Model.Places.Any())
+    {
+        <p>No places found.</p>
+    }
+    else
+    {
+        foreach (var place in Model.Places)
+        {
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                <h3>@place.Name</h3>
+                <p>@place.ShortDescription</p>
+                <p>
+                    <strong>City:</strong> @place.City?.Name |
+                    <strong>Category:</strong> @place.Category?.Name
+                </p>
+
+                <a asp-controller="Place" asp-action="Detail" asp-route-slug="@place.Slug">View Details</a>
+
+            </div>
+        }
+    }
+</div>

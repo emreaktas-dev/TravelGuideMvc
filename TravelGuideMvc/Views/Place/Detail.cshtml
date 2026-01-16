@@ -1,0 +1,129 @@
+﻿@model TravelGuideMvc.ViewModels.PlaceDetailVm
+@using System.Globalization
+@using TravelGuideMvc.ViewModels
+
+@{
+    var p = Model.Place;
+
+    // Google Maps'in doğru okuması için nokta (.) ile formatla
+    var lat = p.Latitude.ToString(CultureInfo.InvariantCulture);
+    var lng = p.Longitude.ToString(CultureInfo.InvariantCulture);
+
+    var mapsUrl = $"https://www.google.com/maps/search/?api=1&query={lat},{lng}";
+    var directionsUrl = $"https://www.google.com/maps/dir/?api=1&destination={lat},{lng}";
+
+    string FormatDistance(int meters)
+    {
+        if (meters < 1000) return $"{meters} m";
+        var km = meters / 1000.0;
+        return $"{km:0.#} km";
+    }
+}
+
+<h1>@p.Name</h1>
+
+<p style="color: gray;">
+    City: <strong>@p.City?.Name</strong> |
+    Category: <strong>@p.Category?.Name</strong>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(p.ShortDescription))
+{
+    <p><em>@p.ShortDescription</em></p>
+}
+
+@if (!string.IsNullOrWhiteSpace(p.Description))
+{
+    <p>@p.Description</p>
+}
+
+<hr />
+
+<h3>Location</h3>
+
+@if (!string.IsNullOrWhiteSpace(p.Address))
+{
+    <p><strong>Address:</strong> @p.Address</p>
+}
+
+<p>
+    <strong>Coordinates:</strong> @p.Latitude, @p.Longitude
+    |
+    <a href="@mapsUrl" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+    |
+    <a href="@directionsUrl" target="_blank" rel="noopener noreferrer">Get Directions</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(p.OpeningHours) ||
+     !string.IsNullOrWhiteSpace(p.PriceInfo) ||
+     !string.IsNullOrWhiteSpace(p.BestTimeToVisit))
+{
+    <hr />
+    <h3>Info</h3>
+    <ul>
+        @if (!string.IsNullOrWhiteSpace(p.OpeningHours))
+        {
+            <li><strong>Opening hours:</strong> @p.OpeningHours</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(p.PriceInfo))
+        {
+            <li><strong>Price:</strong> @p.PriceInfo</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(p.BestTimeToVisit))
+        {
+            <li><strong>Best time:</strong> @p.BestTimeToVisit</li>
+        }
+    </ul>
+}
+
+@if (p.Images != null && p.Images.Any())
+{
+    <hr />
+    <h3>Photos</h3>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        @foreach (var img in p.Images.OrderBy(x => x.Order))
+        {
+            <img src="@img.Url"
+                 alt="photo"
+                 style="width:260px; height:170px; object-fit:cover; border:1px solid #ddd; border-radius:10px;" />
+        }
+    </div>
+}
+
+<hr />
+
+<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <h3 style="margin:0;">Nearby</h3>
+
+    <!-- Radius seçimi -->
+    <form method="get"
+          asp-controller="Place"
+          asp-action="Detail"
+          asp-route-slug="@Model.Place.Slug"
+          style="display:flex; align-items:center; gap:8px;">
+        <label style="font-weight:600;">Radius:</label>
+
+        <select name="radius" onchange="this.form.submit()" style="padding:6px 10px;">
+            <option value="2000" selected="@(Model.RadiusMeters == 2000)">2 km</option>
+            <option value="5000" selected="@(Model.RadiusMeters == 5000)">5 km</option>
+            <option value="10000" selected="@(Model.RadiusMeters == 10000)">10 km</option>
+            <option value="50000" selected="@(Model.RadiusMeters == 50000)">50 km</option>
+        </select>
+
+        <noscript>
+            <button type="submit">Apply</button>
+        </noscript>
+    </form>
+</div>
+
+<p style="color:gray; margin-top:6px;">
+    Showing results within <strong>@FormatDistance(Model.RadiusMeters)</strong> of this place.
+</p>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hotels", Icon = "🏨", ShowPhone = true, Items = Model.NearbyHotels })
+    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Restaurants", Icon = "🍽️", ShowPhone = true, Items = Model.NearbyRestaurants })
+    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hospitals", Icon = "🏥", ShowPhone = true, Items = Model.NearbyHospitals })
+    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "ATMs", Icon = "🏧", ShowPhone = false, Items = Model.NearbyATMs })
+</div>
