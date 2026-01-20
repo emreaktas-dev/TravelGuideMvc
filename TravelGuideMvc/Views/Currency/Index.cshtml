@@ -1,0 +1,83 @@
+﻿@model TravelGuideMvc.ViewModels.CurrencyVm
+
+@{
+    string FmtRate(decimal x) => x.ToString("0.####"); // 4 basamak
+    string FmtMoney(decimal x) => x.ToString("0.##"); // 2 basamak
+}
+
+<h1 class="mb-1">Currency</h1>
+<p class="text-muted">
+    Source: NBKR daily.xml (cached 1 hour). Rates: <strong>1 unit = X KGS</strong>.
+</p>
+
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> @Model.Error
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row gy-2 gx-2 align-items-end">
+            <div class="col-12 col-md-3">
+                <label class="form-label"><strong>Amount</strong></label>
+                <input class="form-control" type="number" name="amount" step="0.01" min="0.01" value="@Model.Amount" />
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label"><strong>From</strong></label>
+                <select class="form-select" name="from">
+                    @foreach (var c in Model.Supported)
+                    {
+                        <option value="@c" selected="@(Model.From.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label"><strong>To</strong></label>
+                <select class="form-select" name="to">
+                    @foreach (var c in Model.Supported)
+                    {
+                        <option value="@c" selected="@(Model.To.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <button class="btn btn-dark w-100" type="submit">Convert</button>
+            </div>
+        </form>
+
+        @if (Model.Result.HasValue)
+        {
+            <hr />
+            <div class="fs-5">
+                <strong>@FmtMoney(Model.Amount)</strong> @Model.From
+                =
+                <strong>@FmtMoney(Model.Result.Value)</strong> @Model.To
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Quick view</h5>
+        <div class="row">
+            @foreach (var c in Model.Supported)
+            {
+                if (Model.RatesToKgs.TryGetValue(c, out var rate))
+                {
+                    <div class="col-12 col-md-6 mb-2">
+                        <div class="d-flex justify-content-between border rounded px-3 py-2">
+                            <span><strong>@c</strong></span>
+                            <span>@FmtRate(rate) KGS</span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

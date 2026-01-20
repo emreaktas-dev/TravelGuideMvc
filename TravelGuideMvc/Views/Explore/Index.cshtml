@@ -1,53 +1,63 @@
 ﻿@model TravelGuideMvc.ViewModels.ExploreVm
 
-<h1>Explore Kyrgyzstan</h1>
+<div class="p-4 p-md-5 mb-4 rounded-3 border bg-light">
+    <h1 class="display-5 fw-bold mb-2">Explore Kyrgyzstan 🇰🇬</h1>
+    <p class="text-muted fs-5 mb-3">
+        Find places to visit, filter by city & category, and open details for maps and nearby services.
+    </p>
 
-<form method="get" class="mb-4">
-    <select name="cityId">
-        <option value="">All Cities</option>
-        @foreach (var city in Model.Cities)
+    <form method="get" class="row gy-2 gx-2 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold">Search</label>
+            <input class="form-control" name="search" value="@Model.Search" placeholder="Try: Issyk, Park, Museum..." />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold">City</label>
+            <select class="form-select" name="cityId">
+                <option value="">All Cities</option>
+                @foreach (var c in Model.Cities)
+                {
+                    <option value="@c.Id" selected="@(Model.CityId == c.Id)">@c.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold">Category</label>
+            <select class="form-select" name="categoryId">
+                <option value="">All Categories</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+            <button class="btn btn-dark w-100" type="submit">Filter</button>
+        </div>
+
+        <div class="col-12">
+            <a class="btn btn-sm btn-outline-secondary mt-2" href="/Explore">Reset</a>
+        </div>
+    </form>
+</div>
+
+<h3 class="mb-3">Places</h3>
+
+@if (!Model.Places.Any())
+{
+    <div class="alert alert-warning">No places found. Try changing filters.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in Model.Places)
         {
-            <option value="@city.Id" selected="@(city.Id == Model.SelectedCityId)">
-                @city.Name
-            </option>
-        }
-    </select>
-
-    <select name="categoryId">
-        <option value="">All Categories</option>
-        @foreach (var cat in Model.Categories)
-        {
-            <option value="@cat.Id" selected="@(cat.Id == Model.SelectedCategoryId)">
-                @cat.Name
-            </option>
-        }
-    </select>
-
-    <button type="submit">Filter</button>
-</form>
-
-<hr />
-
-<div>
-    @if (!Model.Places.Any())
-    {
-        <p>No places found.</p>
-    }
-    else
-    {
-        foreach (var place in Model.Places)
-        {
-            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                <h3>@place.Name</h3>
-                <p>@place.ShortDescription</p>
-                <p>
-                    <strong>City:</strong> @place.City?.Name |
-                    <strong>Category:</strong> @place.Category?.Name
-                </p>
-
-                <a asp-controller="Place" asp-action="Detail" asp-route-slug="@place.Slug">View Details</a>
-
+            <div class="col-12 col-md-6 col-lg-4">
+                @await Html.PartialAsync("_PlaceCard", p)
             </div>
         }
-    }
-</div>
+    </div>
+}

@@ -16,7 +16,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IPlaceService, PlaceService>();
 builder.Services.AddScoped<IServicePointService, ServicePointService>();
-
+builder.Services.AddScoped<IEmergencyService, EmergencyService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<ICurrencyService, NbkrCurrencyService>();
 
 var app = builder.Build();
 

@@ -1,8 +1,167 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .hero-section {
+        /* Arka plan görseli */
+        background: linear-gradient(to right, rgba(0, 35, 50, 0.8), rgba(0, 35, 50, 0.3)), url('/images/nature.jpg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        border-radius: 1rem;
+        padding: 4rem 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        margin-bottom: 3rem;
+    }
+
+    .feature-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 1rem;
+        background: #fff;
+        overflow: hidden;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        }
+
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 1.75rem; /* İkon boyutu ayarlandı */
+        margin-bottom: 1rem;
+    }
+
+    .btn-hero {
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px; /* İkon ile yazı arası boşluk */
+    }
+
+    /* Renk Sınıfları */
+    .bg-icon-primary {
+        background-color: #e3f2fd;
+        color: #0d6efd;
+    }
+
+    .bg-icon-success {
+        background-color: #e8f5e9;
+        color: #198754;
+    }
+
+    .bg-icon-warning {
+        background-color: #fff3e0;
+        color: #ff9800;
+    }
+</style>
+
+<div class="hero-section d-flex align-items-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill">
+                    <i class="bi bi-globe-central-south-asia me-1"></i> Discover Kyrgyzstan
+                </span>
+                <h1 class="display-3 fw-bold mb-3">Welcome to Sayakat</h1>
+                <p class="lead mb-4 text-white-50" style="max-width: 600px;">
+                    Your ultimate guide to the celestial mountains. Explore hidden gems,
+                    find local services, and navigate your journey with confidence.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a class="btn btn-primary btn-hero shadow-sm border-0" style="background-color: #00bcd4;" href="/Explore">
+                        <i class="bi bi-map-fill"></i> Start Exploring
+                    </a>
+                    <a class="btn btn-outline-light btn-hero" href="/Currency">
+                        <i class="bi bi-calculator"></i> Currency Tools
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card h-100 shadow-sm p-4">
+                <div class="card-body">
+                    <div class="icon-box bg-icon-primary">
+                        <i class="bi bi-compass-fill"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Explore Places</h4>
+                    <p class="card-text text-muted">
+                        Browse top destinations by city & category. View detailed photos and descriptions of mountains, lakes, and historical sites.
+                    </p>
+                    <a href="/Explore" class="text-decoration-none fw-semibold stretched-link">
+                        Go to Map <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card feature-card h-100 shadow-sm p-4">
+                <div class="card-body">
+                    <div class="icon-box bg-icon-success">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Nearby Services</h4>
+                    <p class="card-text text-muted">
+                        Looking for a hotel, ATM, or restaurant? We calculate distances instantly to show you what's around your destination.
+                    </p>
+                    <a href="/Explore" class="text-decoration-none fw-semibold stretched-link">
+                        Find Services <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card feature-card h-100 shadow-sm p-4">
+                <div class="card-body">
+                    <div class="icon-box bg-icon-warning">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Travel Tools</h4>
+                    <p class="card-text text-muted">
+                        Essential tools for tourists: Live currency converter (KGS/USD/TRY) and instant access to emergency contacts.
+                    </p>
+                    <div class="d-flex gap-3 position-relative" style="z-index: 2;">
+                        <a href="/Currency" class="text-decoration-none fw-semibold">Currency</a>
+                        <span class="text-muted">|</span>
+                        <a href="/Emergency" class="text-danger fw-semibold">Emergency</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="p-4 rounded-4 bg-light border border-light shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="fw-bold mb-1">Ready to plan your trip?</h5>
+                <p class="text-muted mb-0 small">
+                    Built with ASP.NET Core MVC • EF Core • LocalDB • Haversine Nearby Calculation
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-dark rounded-pill px-4" disabled>
+                    <i class="bi bi-apple me-1"></i> Download App (Soon)
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

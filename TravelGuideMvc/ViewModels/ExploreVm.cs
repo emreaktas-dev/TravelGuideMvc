@@ -4,12 +4,16 @@ namespace TravelGuideMvc.ViewModels
 {
     public class ExploreVm
     {
-        public List<Place> Places { get; set; } = new();
+        // Filtreler (querystring)
+        public Guid? CityId { get; set; }
+        public Guid? CategoryId { get; set; }
+        public string? Search { get; set; }
 
+        // Dropdown listeleri
         public List<City> Cities { get; set; } = new();
         public List<Category> Categories { get; set; } = new();
 
-        public Guid? SelectedCityId { get; set; }
-        public Guid? SelectedCategoryId { get; set; }
+        // Ana liste
+        public List<Place> Places { get; set; } = new();
     }
 }

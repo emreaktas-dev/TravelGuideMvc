@@ -1,0 +1,180 @@
+﻿@model TravelGuideMvc.ViewModels.EmergencyVm
+
+@{
+    ViewData["Title"] = "Emergency Contacts";
+}
+
+<style>
+    /* Kartın genel yapısı */
+    .emergency-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #fff;
+    }
+
+        .emergency-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+    /* Sol taraftaki resim alanı */
+    .emergency-img-box {
+        width: 120px;
+        min-height: 120px;
+        background-position: center;
+        background-size: cover;
+        position: relative;
+    }
+
+    /* Resmin üzerindeki renkli filtre */
+    .img-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    /* Telefon numarası stili */
+    .phone-display {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #2c3e50;
+    }
+
+    /* Arama butonu */
+    .btn-call {
+        border-radius: 50px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+    }
+
+        .btn-call:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+    /* Mobil uyumluluk (DÜZELTİLEN KISIM: @@media yapıldı) */
+    @@media (max-width: 768px) {
+        .emergency-card .d-flex {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .emergency-img-box {
+            width: 100%;
+            height: 150px;
+        }
+
+        .card-actions {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-call {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-danger bg-opacity-10 text-danger mb-2 px-3 py-2 rounded-pill">
+            <i class="bi bi-exclamation-circle-fill me-1"></i> EMERGENCY SUPPORT
+        </span>
+        <h1 class="display-4 fw-bold mb-3">Important Contacts</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 600px;">
+            Essential phone numbers for safety and assistance while traveling in Kyrgyzstan. Tap to call instantly.
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex flex-column gap-4">
+
+                @foreach (var c in Model.Contacts)
+                {
+                    // Kartın tipine göre resim ve ikon belirleme mantığı
+                    string bgImage = "https://images.unsplash.com/photo-1516733968668-dbdce39c4651?auto=format&fit=crop&w=400&q=60"; // Varsayılan (Mavi/Genel)
+                    string iconClass = "bi-telephone-fill";
+                    string overlayColor = "rgba(33, 37, 41, 0.6)"; // Koyu gri filtre
+
+                    var titleLower = c.Title.ToLower();
+
+                    if (titleLower.Contains("police") || titleLower.Contains("polis"))
+                    {
+                        bgImage = "https://images.unsplash.com/photo-1456964513482-f21a79998104?auto=format&fit=crop&w=400&q=60"; // Polis Arabası
+                        iconClass = "bi-shield-shaded";
+                        overlayColor = "rgba(13, 110, 253, 0.7)"; // Mavi filtre
+                    }
+                    else if (titleLower.Contains("ambulance") || titleLower.Contains("medical") || titleLower.Contains("103"))
+                    {
+                        bgImage = "https://images.unsplash.com/photo-1587745416684-47953f16f0ae?auto=format&fit=crop&w=400&q=60"; // Ambulans
+                        iconClass = "bi-heart-pulse-fill";
+                        overlayColor = "rgba(220, 53, 69, 0.7)"; // Kırmızı filtre
+                    }
+                    else if (titleLower.Contains("fire") || titleLower.Contains("101"))
+                    {
+                        bgImage = "https://images.unsplash.com/photo-1559828552-6b3a2472d426?auto=format&fit=crop&w=400&q=60"; // İtfaiye
+                        iconClass = "bi-fire";
+                        overlayColor = "rgba(255, 87, 34, 0.7)"; // Turuncu filtre
+                    }
+
+                    <div class="emergency-card shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <div class="emergency-img-box" style="background-image: url('@bgImage');">
+                                <div class="img-overlay" style="background: @overlayColor;">
+                                    <i class="bi @iconClass"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1 p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="fw-bold text-uppercase text-secondary mb-1" style="font-size: 0.85rem; letter-spacing: 1px;">
+                                            @c.Title
+                                        </h5>
+                                        <div class="phone-display">
+                                            @c.PhoneNumber
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(c.Notes))
+                                        {
+                                            <div class="text-muted small mt-2">
+                                                <i class="bi bi-info-circle me-1"></i> @c.Notes
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 text-md-end card-actions">
+                                        <a href="tel:@c.PhoneNumber" class="btn btn-danger btn-call shadow">
+                                            <i class="bi bi-telephone-outbound-fill me-2"></i> Call
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <div class="mt-5 p-4 rounded-3 bg-light border text-center text-muted small">
+                <i class="bi bi-broadcast me-1"></i>
+                Emergency services in Kyrgyzstan speak mostly Kyrgyz and Russian.
+                If you don't speak these languages, try to get help from a local or call your embassy first.
+            </div>
+        </div>
+    </div>
+</div>

@@ -178,6 +178,8 @@ namespace TravelGuideMvc.Data
                 }
             );
 
+
+
             await db.SaveChangesAsync();
         }
     }

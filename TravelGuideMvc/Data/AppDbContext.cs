@@ -13,6 +13,7 @@ namespace TravelGuideMvc.Data
         public DbSet<PlaceImage> PlaceImages => Set<PlaceImage>();
         public DbSet<ServicePoint> ServicePoints => Set<ServicePoint>();
         public DbSet<EmergencyContact> EmergencyContacts => Set<EmergencyContact>();
+
         public DbSet<CultureArticle> CultureArticles => Set<CultureArticle>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

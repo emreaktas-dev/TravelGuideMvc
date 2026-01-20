@@ -3,48 +3,137 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TravelGuideMvc</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Sayakat</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TravelGuideMvc.styles.css" asp-append-version="true" />
+
+    <style>
+        /* Navbar Genel Ayarları */
+        .navbar {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            background-color: #fff !important;
+            min-height: 100px;
+        }
+
+        /* Menü Linkleri */
+        .nav-link {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #444;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px !important;
+        }
+
+            .nav-link:hover, .nav-link.active {
+                color: #00bcd4 !important; /* Sayakat Turkuazı */
+                background-color: rgba(0, 188, 212, 0.05);
+                border-radius: 8px;
+            }
+
+        /* LOGO AYARI */
+        .navbar-brand img {
+            max-height: 80px;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Navbar gölgesi */
+        .box-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TravelGuideMvc</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-light border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand p-0 me-4" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="Sayakat Logo">
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Explore" asp-action="Index">
+                                Explore
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-controller="Currency" asp-action="Index">
+                                Currency
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Emergency" asp-action="Index">
+                                Emergency
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link disabled text-muted" href="#" style="opacity: 0.7;">
+                                Culture
+                                <span class="badge bg-secondary text-white ms-2" style="font-size: 0.6rem;">SOON</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item d-none d-lg-block mx-2 text-muted opacity-25" style="font-size: 1.5rem; font-weight: 100;">|</li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">
+                                Privacy
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-auto py-4 bg-light">
         <div class="container">
-            &copy; 2026 - TravelGuideMvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                    &copy; 2026 - <strong>Sayakat</strong> &bull; Kyrgyzstan Travel Guide
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted small">Privacy Policy</a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

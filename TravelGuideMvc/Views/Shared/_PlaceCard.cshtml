@@ -1,0 +1,40 @@
+﻿@model TravelGuideMvc.Models.Place
+
+@{
+    var img = Model.Images?.OrderBy(x => x.Order).FirstOrDefault()?.Url;
+
+    // resim yoksa fallback
+    var cover = string.IsNullOrWhiteSpace(img)
+        ? "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=60"
+        : img;
+
+    var city = Model.City?.Name ?? "Unknown city";
+    var cat = Model.Category?.Name ?? "Category";
+}
+
+<div class="card h-100 shadow-sm">
+    <img src="@cover" class="card-img-top" style="height:170px; object-fit:cover;" alt="cover" />
+
+    <div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <h5 class="card-title mb-1">@Model.Name</h5>
+            <span class="badge bg-secondary">@cat</span>
+        </div>
+
+        <div class="text-muted small mb-2">📍 @city</div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+        {
+            <p class="card-text text-muted" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                @Model.ShortDescription
+            </p>
+        }
+
+        <div class="mt-auto">
+            <a class="btn btn-outline-dark btn-sm"
+               asp-controller="Place" asp-action="Detail" asp-route-slug="@Model.Slug">
+                View details →
+            </a>
+        </div>
+    </div>
+</div>
