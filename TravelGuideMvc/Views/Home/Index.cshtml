@@ -1,167 +1,309 @@
-﻿@{
+﻿@model TravelGuideMvc.ViewModels.HomeVm
+
+@{
     ViewData["Title"] = "Home";
+    // Siyah beyaz veya karanlık bir fotoğraf tercih et
+    var heroImage = "/images/nature.jpg";
 }
 
 <style>
-    .hero-section {
-        /* Arka plan görseli */
-        background: linear-gradient(to right, rgba(0, 35, 50, 0.8), rgba(0, 35, 50, 0.3)), url('/images/nature.jpg');
+    /* --- GENEL DEĞİŞKENLER --- */
+    :root {
+        --primary-teal: #00a896; /* Canlı Turkuaz */
+        --primary-gold: #f0c419; /* Canlı Altın */
+        --primary-blue: #3b82f6; /* Canlı Mavi */
+        --gray-dark: #212529;
+    }
+
+    /* --- BÖLÜM 1: GRİ HERO ALANI (Kompakt) --- */
+    .hero-wrapper-gray {
+        position: relative;
+        /* Siyah-beyaz filtre ve koyu gradyan */
+        background: linear-gradient(to bottom, rgba(33, 37, 41, 0.85), rgba(33, 37, 41, 0.5)), url('@heroImage');
         background-size: cover;
         background-position: center;
+        /* Yükseklik azaltıldı */
+        padding: 4rem 1rem 6rem 1rem;
+        border-radius: 0 0 2rem 2rem;
         color: white;
-        border-radius: 1rem;
-        padding: 4rem 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        margin-bottom: 3rem;
+        margin-bottom: 4rem;
+        /* Resme gri efekt uygula */
+        filter: grayscale(100%);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
 
-    .feature-card {
-        transition: all 0.3s ease;
+    .btn-gray {
+        background: #495057;
+        color: white;
         border: none;
-        border-radius: 1rem;
-        background: #fff;
-        overflow: hidden;
+        transition: 0.3s;
     }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        .btn-gray:hover {
+            background: #212529;
+            transform: translateY(-2px);
         }
 
-    .icon-box {
-        width: 60px;
-        height: 60px;
+    .btn-outline-gray {
+        background: transparent;
+        color: white;
+        border: 2px solid rgba(255,255,255,0.5);
+        transition: 0.3s;
+    }
+
+        .btn-outline-gray:hover {
+            background: white;
+            color: #212529;
+            border-color: white;
+        }
+
+
+    /* --- BÖLÜM 2: RENKLİ ÖZELLİK KARTLARI --- */
+    .feature-section-container {
+        margin-top: -4rem; /* Hero'nun üzerine biniyor */
+        position: relative;
+        z-index: 5;
+    }
+
+    .feature-card-color {
+        border: none;
+        border-radius: 1.5rem;
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Kartların tepesindeki renkli çizgiler */
+    .border-top-teal {
+        border-top: 5px solid var(--primary-teal);
+    }
+
+    .border-top-gold {
+        border-top: 5px solid var(--primary-gold);
+    }
+
+    .border-top-blue {
+        border-top: 5px solid var(--primary-blue);
+    }
+
+    .feature-card-color:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+
+    /* Renkli İkon Kutuları */
+    .icon-box-color {
+        width: 65px;
+        height: 65px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        font-size: 1.75rem; /* İkon boyutu ayarlandı */
-        margin-bottom: 1rem;
+        border-radius: 1rem;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
     }
 
-    .btn-hero {
-        padding: 0.8rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px; /* İkon ile yazı arası boşluk */
+    .bg-teal-soft {
+        background: rgba(0, 168, 150, 0.15);
+        color: var(--primary-teal);
     }
 
-    /* Renk Sınıfları */
-    .bg-icon-primary {
-        background-color: #e3f2fd;
-        color: #0d6efd;
+    .bg-gold-soft {
+        background: rgba(240, 196, 25, 0.15);
+        color: var(--primary-gold);
     }
 
-    .bg-icon-success {
-        background-color: #e8f5e9;
-        color: #198754;
+    .bg-blue-soft {
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--primary-blue);
     }
 
-    .bg-icon-warning {
-        background-color: #fff3e0;
-        color: #ff9800;
+    .feature-card-color:hover .icon-box-color {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+
+    /* --- BÖLÜM 3: YATAY KAYDIRILABİLİR (SLIDING) ALAN --- */
+    .scrolling-wrapper-container {
+        /* Kaydırma çubuğunu gizle ama kaydırmaya izin ver */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Mobilde yumuşak kaydırma */
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 1.5rem;
+        padding: 1rem 5px 2rem 5px; /* Alt kısımdaki padding gölge kesilmesin diye */
+        /* CSS Scroll Snap (Kartların tam ortada durması için) */
+        scroll-snap-type: x mandatory;
+    }
+
+        /* Kaydırma çubuğunu tamamen gizlemek için (Chrome/Safari) */
+        .scrolling-wrapper-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .scrolling-card-item {
+        flex: 0 0 auto; /* Kartların genişliği sabit kalsın, sıkışmasın */
+        width: 320px; /* Her bir kartın genişliği */
+        scroll-snap-align: start; /* Kaydırınca başa hizalansın */
+        /* Giriş Animasyonu */
+        opacity: 0;
+        animation: slideInRight 0.6s ease-out forwards;
+    }
+
+        /* Kartların sırayla gelmesi için gecikmeler */
+        .scrolling-card-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .scrolling-card-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .scrolling-card-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .scrolling-card-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .scrolling-card-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .scrolling-card-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+    @@keyframes slideInRight {
+        from
+
+    {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
     }
 </style>
 
-<div class="hero-section d-flex align-items-center">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill">
-                    <i class="bi bi-globe-central-south-asia me-1"></i> Discover Kyrgyzstan
-                </span>
-                <h1 class="display-3 fw-bold mb-3">Welcome to Sayakat</h1>
-                <p class="lead mb-4 text-white-50" style="max-width: 600px;">
-                    Your ultimate guide to the celestial mountains. Explore hidden gems,
-                    find local services, and navigate your journey with confidence.
-                </p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a class="btn btn-primary btn-hero shadow-sm border-0" style="background-color: #00bcd4;" href="/Explore">
-                        <i class="bi bi-map-fill"></i> Start Exploring
-                    </a>
-                    <a class="btn btn-outline-light btn-hero" href="/Currency">
-                        <i class="bi bi-calculator"></i> Currency Tools
-                    </a>
-                </div>
+<div class="container-fluid p-0">
+    <div class="hero-wrapper-gray text-center d-flex align-items-center justify-content-center">
+        <div class="container">
+            <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3 fw-bold small text-uppercase ls-1">
+                Guidance & Tools
+            </span>
+
+            <h1 class="display-4 fw-bold mb-3 ls-1">Sayakat Essentials</h1>
+
+            <p class="lead text-white-50 mx-auto mb-4 fs-5 fw-light" style="max-width: 600px;">
+                Your minimalist toolkit for navigating Kyrgyzstan. Access maps, services, and crucial information without distractions.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a class="btn btn-gray rounded-pill px-4 py-2 fw-bold" href="/Explore">
+                    Start Exploring
+                </a>
+                <a class="btn btn-outline-gray rounded-pill px-4 py-2 fw-bold" href="/Currency">
+                    Tools
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container mb-5">
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card feature-card h-100 shadow-sm p-4">
-                <div class="card-body">
-                    <div class="icon-box bg-icon-primary">
-                        <i class="bi bi-compass-fill"></i>
+
+<div class="container">
+    <div class="feature-section-container mb-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card-color border-top-teal p-4">
+                    <div class="card-body">
+                        <div class="icon-box-color bg-teal-soft">
+                            <i class="bi bi-map-fill"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3 text-dark">Discover</h4>
+                        <p class="card-text text-muted mb-4 small">
+                            Explore destinations with vivid details. Find hidden gems and popular spots.
+                        </p>
+                        <a href="/Explore" class="stretched-link text-decoration-none fw-bold" style="color: var(--primary-teal);">
+                            Go to Map <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
-                    <h4 class="card-title fw-bold">Explore Places</h4>
-                    <p class="card-text text-muted">
-                        Browse top destinations by city & category. View detailed photos and descriptions of mountains, lakes, and historical sites.
-                    </p>
-                    <a href="/Explore" class="text-decoration-none fw-semibold stretched-link">
-                        Go to Map <i class="bi bi-arrow-right"></i>
-                    </a>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card feature-card h-100 shadow-sm p-4">
-                <div class="card-body">
-                    <div class="icon-box bg-icon-success">
-                        <i class="bi bi-geo-alt-fill"></i>
+            <div class="col-md-4">
+                <div class="card feature-card-color border-top-gold p-4">
+                    <div class="card-body">
+                        <div class="icon-box-color bg-gold-soft">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3 text-dark">Locate</h4>
+                        <p class="card-text text-muted mb-4 small">
+                            Find nearby services, hotels, and restaurants instantly.
+                        </p>
+                        <a href="/Explore" class="stretched-link text-decoration-none fw-bold" style="color: var(--primary-gold);">
+                            Find Services <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
-                    <h4 class="card-title fw-bold">Nearby Services</h4>
-                    <p class="card-text text-muted">
-                        Looking for a hotel, ATM, or restaurant? We calculate distances instantly to show you what's around your destination.
-                    </p>
-                    <a href="/Explore" class="text-decoration-none fw-semibold stretched-link">
-                        Find Services <i class="bi bi-arrow-right"></i>
-                    </a>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card feature-card h-100 shadow-sm p-4">
-                <div class="card-body">
-                    <div class="icon-box bg-icon-warning">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <h4 class="card-title fw-bold">Travel Tools</h4>
-                    <p class="card-text text-muted">
-                        Essential tools for tourists: Live currency converter (KGS/USD/TRY) and instant access to emergency contacts.
-                    </p>
-                    <div class="d-flex gap-3 position-relative" style="z-index: 2;">
-                        <a href="/Currency" class="text-decoration-none fw-semibold">Currency</a>
-                        <span class="text-muted">|</span>
-                        <a href="/Emergency" class="text-danger fw-semibold">Emergency</a>
+            <div class="col-md-4">
+                <div class="card feature-card-color border-top-blue p-4">
+                    <div class="card-body">
+                        <div class="icon-box-color bg-blue-soft">
+                            <i class="bi bi-tools"></i>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3 text-dark">Tools</h4>
+                        <p class="card-text text-muted mb-4 small">
+                            Currency converter and emergency contacts at your fingertips.
+                        </p>
+                        <div class="d-flex gap-3 position-relative small" style="z-index: 2;">
+                            <a href="/Currency" class="text-decoration-none fw-bold" style="color: var(--primary-blue);">Currency</a>
+                            <span class="text-muted opacity-50">|</span>
+                            <a href="/Emergency" class="text-decoration-none fw-bold text-danger">SOS</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="container mb-5">
-    <div class="p-4 rounded-4 bg-light border border-light shadow-sm">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h5 class="fw-bold mb-1">Ready to plan your trip?</h5>
-                <p class="text-muted mb-0 small">
-                    Built with ASP.NET Core MVC • EF Core • LocalDB • Haversine Nearby Calculation
-                </p>
-            </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <button class="btn btn-dark rounded-pill px-4" disabled>
-                    <i class="bi bi-apple me-1"></i> Download App (Soon)
-                </button>
-            </div>
+    <div class="my-5 py-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h3 class="fw-bold m-0">Featured Destinations 🏔️</h3>
+            <a href="/Explore" class="btn btn-outline-dark rounded-pill btn-sm px-3">View All</a>
         </div>
+
+        @if (Model.FeaturedPlaces != null && Model.FeaturedPlaces.Any())
+        {
+            // YATAY KAYDIRMA KONTEYNERİ
+            <div class="scrolling-wrapper-container">
+                @foreach (var place in Model.FeaturedPlaces)
+                {
+                    // HER BİR KART ÖĞESİ (Sabit genişlikte)
+                    <div class="scrolling-card-item">
+                        @* Mevcut _PlaceCard partial'ını kullanıyoruz *@
+                        @await Html.PartialAsync("_PlaceCard", place)
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border text-center">
+                No featured places found yet.
+            </div>
+        }
     </div>
 </div>

@@ -1,63 +1,172 @@
 ﻿@model TravelGuideMvc.ViewModels.ExploreVm
 
-<div class="p-4 p-md-5 mb-4 rounded-3 border bg-light">
-    <h1 class="display-5 fw-bold mb-2">Explore Kyrgyzstan 🇰🇬</h1>
-    <p class="text-muted fs-5 mb-3">
-        Find places to visit, filter by city & category, and open details for maps and nearby services.
-    </p>
+@{
+    var hasResults = Model.Places != null && Model.Places.Any();
 
-    <form method="get" class="row gy-2 gx-2 align-items-end">
-        <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Search</label>
-            <input class="form-control" name="search" value="@Model.Search" placeholder="Try: Issyk, Park, Museum..." />
-        </div>
+    // EDIT HERE: The name of your hero image file in wwwroot/images
+    var heroImage = "/images/nature.jpg";
+}
 
-        <div class="col-6 col-md-3">
-            <label class="form-label fw-semibold">City</label>
-            <select class="form-select" name="cityId">
-                <option value="">All Cities</option>
-                @foreach (var c in Model.Cities)
-                {
-                    <option value="@c.Id" selected="@(Model.CityId == c.Id)">@c.Name</option>
-                }
-            </select>
-        </div>
+<style>
+    :root {
+        --primary-teal: #008080;
+        --soft-bg: #f8f9fa;
+    }
 
-        <div class="col-6 col-md-3">
-            <label class="form-label fw-semibold">Category</label>
-            <select class="form-select" name="categoryId">
-                <option value="">All Categories</option>
-                @foreach (var cat in Model.Categories)
-                {
-                    <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
-                }
-            </select>
-        </div>
+    /* HERO SECTION */
+    .hero-section {
+        background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.4)), url('@heroImage');
+        background-size: cover;
+        background-position: center bottom;
+        color: white;
+        padding: 7rem 1rem 9rem 1rem;
+        border-radius: 0 0 2.5rem 2.5rem;
+        position: relative;
+        margin-bottom: 5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
 
-        <div class="col-12 col-md-2">
-            <button class="btn btn-dark w-100" type="submit">Filter</button>
-        </div>
+    .search-container {
+        margin-top: -6rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+        padding: 2rem;
+        position: relative;
+        z-index: 10;
+        border: 1px solid rgba(255,255,255,0.6);
+    }
 
-        <div class="col-12">
-            <a class="btn btn-sm btn-outline-secondary mt-2" href="/Explore">Reset</a>
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        padding: 0.8rem 1rem;
+        border-radius: 0.8rem;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-teal);
+            box-shadow: 0 0 0 4px rgba(0, 128, 128, 0.1);
+        }
+
+    .btn-search {
+        background-color: var(--primary-teal);
+        color: white;
+        border: none;
+        padding: 0.8rem;
+        border-radius: 0.8rem;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+        .btn-search:hover {
+            background-color: #005f5f;
+            transform: translateY(-2px);
+        }
+
+    .tag-badge {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.4);
+        color: white;
+        padding: 0.5em 1.2em;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s;
+        cursor: default;
+    }
+
+        .tag-badge:hover {
+            background: rgba(255,255,255,0.35);
+        }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3">Explore Kyrgyzstan</h1>
+            <p class="lead mb-4 text-white-50 mx-auto fs-5" style="max-width: 750px;">
+                From the peaks of the Tien Shan to the depths of Issyk Kul...
+                Experience nature, history, and culture with a modern guide.
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                <span class="tag-badge">🏔️ Nature & Adventure</span>
+                <span class="tag-badge">🏛️ History</span>
+                <span class="tag-badge">🎭 Culture</span>
+                <span class="tag-badge">🗺️ City Guide</span>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
 
-<h3 class="mb-3">Places</h3>
-
-@if (!Model.Places.Any())
-{
-    <div class="alert alert-warning">No places found. Try changing filters.</div>
-}
-else
-{
-    <div class="row g-3">
-        @foreach (var p in Model.Places)
-        {
-            <div class="col-12 col-md-6 col-lg-4">
-                @await Html.PartialAsync("_PlaceCard", p)
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="search-container">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-12 col-lg-5">
+                        <label class="form-label fw-bold text-muted small text-uppercase">What are you looking for?</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i class="bi bi-search"></i></span>
+                            <input class="form-control border-start-0 ps-2" name="search" value="@Model.Search" placeholder="Ex: Issyk Kul, Bishkek, Museum..." />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">City</label>
+                        <select class="form-select" name="cityId">
+                            <option value="">All Cities</option>
+                            @foreach (var c in Model.Cities)
+                            {
+                                <option value="@c.Id" selected="@(Model.CityId == c.Id)">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Category</label>
+                        <select class="form-select" name="categoryId">
+                            <option value="">All Categories</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-1 d-grid">
+                        <button class="btn btn-search h-100" type="submit">Search</button>
+                    </div>
+                </form>
             </div>
-        }
+        </div>
     </div>
-}
+
+    <div class="row mt-5 justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold m-0 text-dark">Popular Destinations</h3>
+                @if (hasResults)
+                {
+                    <span class="badge bg-light text-dark border">@Model.Places.Count destinations found</span>
+                }
+            </div>
+
+            @if (!hasResults)
+            {
+                <div class="text-center py-5 rounded-4 bg-light border border-dashed">
+                    <div class="fs-1 text-muted mb-2">🔍</div>
+                    <h4 class="fw-semibold text-muted">No Results Found</h4>
+                    <p class="small text-muted">Try changing your search criteria or keywords.</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var p in Model.Places)
+                    {
+                        @await Html.PartialAsync("_PlaceCard", p)
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

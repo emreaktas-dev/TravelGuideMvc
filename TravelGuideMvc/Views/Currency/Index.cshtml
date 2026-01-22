@@ -1,83 +1,277 @@
 ﻿@model TravelGuideMvc.ViewModels.CurrencyVm
 
 @{
-    string FmtRate(decimal x) => x.ToString("0.####"); // 4 basamak
-    string FmtMoney(decimal x) => x.ToString("0.##"); // 2 basamak
-}
+    ViewData["Title"] = "Currency Converter";
 
-<h1 class="mb-1">Currency</h1>
-<p class="text-muted">
-    Source: NBKR daily.xml (cached 1 hour). Rates: <strong>1 unit = X KGS</strong>.
-</p>
+    // Formatlama Fonksiyonları
+    string FmtRate(decimal x) => x.ToString("0.####");
+    string FmtMoney(decimal x) => x.ToString("N2");
 
-@if (!string.IsNullOrWhiteSpace(Model.Error))
-{
-    <div class="alert alert-danger" role="alert">
-        <strong>Error:</strong> @Model.Error
-    </div>
-}
+    // Para birimi -> Bayrak Kodu (flag-icon-css kütüphanesi için)
+    string GetFlagCode(string currency)
+    {
+        if (string.IsNullOrEmpty(currency)) return "un"; // United Nations (Bilinmeyen)
 
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row gy-2 gx-2 align-items-end">
-            <div class="col-12 col-md-3">
-                <label class="form-label"><strong>Amount</strong></label>
-                <input class="form-control" type="number" name="amount" step="0.01" min="0.01" value="@Model.Amount" />
-            </div>
-
-            <div class="col-6 col-md-3">
-                <label class="form-label"><strong>From</strong></label>
-                <select class="form-select" name="from">
-                    @foreach (var c in Model.Supported)
-                    {
-                        <option value="@c" selected="@(Model.From.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-6 col-md-3">
-                <label class="form-label"><strong>To</strong></label>
-                <select class="form-select" name="to">
-                    @foreach (var c in Model.Supported)
-                    {
-                        <option value="@c" selected="@(Model.To.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-12 col-md-3">
-                <button class="btn btn-dark w-100" type="submit">Convert</button>
-            </div>
-        </form>
-
-        @if (Model.Result.HasValue)
+        return currency.ToUpper() switch
         {
-            <hr />
-            <div class="fs-5">
-                <strong>@FmtMoney(Model.Amount)</strong> @Model.From
-                =
-                <strong>@FmtMoney(Model.Result.Value)</strong> @Model.To
-            </div>
+            "USD" => "us",
+            "EUR" => "eu",
+            "RUB" => "ru",
+            "KZT" => "kz",
+            "KGS" => "kg",
+            "TRY" => "tr",
+            "CNY" => "cn",
+            "GBP" => "gb",
+            "UZS" => "uz",
+            "JPY" => "jp",
+            "KRW" => "kr",
+            "AED" => "ae",
+            "CAD" => "ca",
+            "AUD" => "au",
+            "CHF" => "ch",
+            _ => "un"
+        };
+    }
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/7.1.0/css/flag-icons.min.css" />
+
+<style>
+    /* DÜZELTME 2: Arka Plana 'money.jpg' Eklendi */
+    .hero-bg {
+        /* Resim ve üzerine okunaklı olması için koyu yeşil/mavi filtre */
+        background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(0, 128, 128, 0.85)), url('/images/money.jpg');
+        background-size: cover;
+        background-position: center center;
+        color: white;
+        padding: 6rem 1rem 8rem 1rem;
+        border-radius: 0 0 3rem 3rem;
+        margin-bottom: -4rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    /* Modern Kart Tasarımı */
+    .currency-card {
+        border: none;
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Swap Butonu */
+    .btn-swap {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        margin: 0 auto;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+        .btn-swap:hover {
+            background-color: #008080;
+            color: white !important;
+            transform: rotate(180deg) scale(1.1);
+            border-color: #008080;
         }
-    </div>
+
+        .btn-swap i {
+            transition: color 0.3s;
+        }
+
+        .btn-swap:hover i {
+            color: white !important;
+        }
+
+    /* Sonuç Alanı */
+    .result-box {
+        animation: slideUp 0.6s ease-out;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 1rem;
+    }
+
+    /* Animasyon Tanımı (Razor için @@ kullanıldı) */
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Bayrak Kartları */
+    .rate-card {
+        transition: all 0.2s ease;
+        border: 1px solid #f0f0f0;
+        background: white;
+    }
+
+        .rate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: #008080;
+        }
+
+    /* Bayrak İkon Ayarı */
+    .flag-icon {
+        border-radius: 2px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="hero-bg text-center">
+    <h1 class="display-4 fw-bold mb-3">Currency Converter 💱</h1>
+    <p class="fs-5 opacity-90 fw-light">
+        Real-time exchange rates sourced from NBKR.<br>
+        <span class="badge bg-white text-dark mt-3 px-3 py-2 rounded-pill shadow-sm">
+            <i class="bi bi-bank me-1"></i> Base: Kyrgyz Som (KGS)
+        </span>
+    </p>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Quick view</h5>
-        <div class="row">
-            @foreach (var c in Model.Supported)
-            {
-                if (Model.RatesToKgs.TryGetValue(c, out var rate))
+<div class="container pb-5">
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="row justify-content-center mt-5">
+            <div class="col-12 col-lg-8">
+                <div class="alert alert-danger shadow-sm rounded-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Error:</strong> @Model.Error
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="currency-card p-4 p-md-5 mb-5">
+                <form method="get" id="currencyForm">
+                    <div class="row g-3 align-items-center">
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase ls-1">Amount</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i class="bi bi-cash-stack"></i></span>
+                                <input class="form-control border-start-0 fw-bold bg-light" type="number" name="amount" step="0.01" min="0.01" value="@Model.Amount" placeholder="100" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase ls-1">From</label>
+                            <select class="form-select form-select-lg fw-bold bg-light" name="from" id="fromCurrency">
+                                @foreach (var c in Model.Supported)
+                                {
+                                    <option value="@c" selected="@(Model.From.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-2 text-center pt-4">
+                            <button type="button" class="btn-swap" onclick="swapCurrencies()" title="Switch">
+                                <i class="bi bi-arrow-left-right text-muted fs-5"></i>
+                            </button>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase ls-1">To</label>
+                            <select class="form-select form-select-lg fw-bold bg-light" name="to" id="toCurrency">
+                                @foreach (var c in Model.Supported)
+                                {
+                                    <option value="@c" selected="@(Model.To.Equals(c, StringComparison.OrdinalIgnoreCase))">@c</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold fs-5 shadow-lg hover-lift" type="submit">
+                                Convert Now <i class="bi bi-chevron-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                @if (Model.Result.HasValue)
                 {
-                    <div class="col-12 col-md-6 mb-2">
-                        <div class="d-flex justify-content-between border rounded px-3 py-2">
-                            <span><strong>@c</strong></span>
-                            <span>@FmtRate(rate) KGS</span>
+                    <div class="result-box p-4 mt-4 text-center">
+                        <div class="text-success small text-uppercase fw-bold mb-1">Exchange Successful</div>
+                        <div class="display-4 fw-bold text-dark mb-3">
+                            @FmtMoney(Model.Result.Value) <span class="fs-4 text-muted">@Model.To</span>
+                        </div>
+                        <div class="d-inline-flex align-items-center bg-white px-4 py-2 rounded-pill shadow-sm border">
+                            <span class="flag-icon flag-icon-@GetFlagCode(Model.From) me-2"></span>
+                            <span class="fw-bold me-3">@FmtMoney(Model.Amount) @Model.From</span>
+                            <i class="bi bi-arrow-right text-muted me-3"></i>
+                            <span class="flag-icon flag-icon-@GetFlagCode(Model.To) me-2"></span>
+                            <span class="fw-bold">@FmtMoney(Model.Result.Value) @Model.To</span>
                         </div>
                     </div>
                 }
-            }
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="d-flex align-items-center justify-content-between mb-4 px-2">
+                <h4 class="fw-bold m-0 text-dark"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Live Rates</h4>
+                <small class="text-muted"><i class="bi bi-clock me-1"></i>Updated: 1 Hour Ago</small>
+            </div>
+
+            <div class="row g-3">
+                @foreach (var c in Model.Supported.Where(x => x != "KGS"))
+                {
+                    if (Model.RatesToKgs.TryGetValue(c, out var rate))
+                    {
+                        var flagCode = GetFlagCode(c);
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm rate-card rounded-4">
+                                <div class="card-body d-flex align-items-center justify-content-between p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="ratio ratio-1x1 rounded-circle overflow-hidden me-3 shadow-sm border position-relative" style="width: 42px; background: #f8f9fa;">
+                                            <span class="flag-icon flag-icon-@flagCode position-absolute top-50 start-50 translate-middle" style="font-size: 1.8em;"></span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@c</div>
+                                            <div class="small text-muted" style="font-size: 0.75rem;">1 Unit</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-primary">@FmtRate(rate)</div>
+                                        <div class="small text-muted" style="font-size: 0.7rem;">KGS</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    function swapCurrencies() {
+        var fromSelect = document.getElementById("fromCurrency");
+        var toSelect = document.getElementById("toCurrency");
+
+        var temp = fromSelect.value;
+        fromSelect.value = toSelect.value;
+        toSelect.value = temp;
+
+        var btn = document.querySelector('.btn-swap');
+        btn.style.transform = "rotate(180deg) scale(1.1)";
+        setTimeout(() => { btn.style.transform = "rotate(0deg) scale(1)"; }, 400);
+    }
+</script>

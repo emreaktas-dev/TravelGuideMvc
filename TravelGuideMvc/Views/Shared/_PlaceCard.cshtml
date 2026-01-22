@@ -1,40 +1,92 @@
 ﻿@model TravelGuideMvc.Models.Place
 
 @{
-    var img = Model.Images?.OrderBy(x => x.Order).FirstOrDefault()?.Url;
+    // FIX 1: Since "ImageUrl" might be missing in your model, we avoided the error.
+    // Instead, we assume the image name is "PlaceName.jpg".
+    // Example: If the place name is "Issyk Kul", it looks for "/images/Issyk Kul.jpg".
 
-    // resim yoksa fallback
-    var cover = string.IsNullOrWhiteSpace(img)
-        ? "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=60"
-        : img;
-
-    var city = Model.City?.Name ?? "Unknown city";
-    var cat = Model.Category?.Name ?? "Category";
+    var imageName = Model.Name + ".jpg";
+    var imagePath = "/images/" + imageName;
 }
 
-<div class="card h-100 shadow-sm">
-    <img src="@cover" class="card-img-top" style="height:170px; object-fit:cover;" alt="cover" />
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 hover-card-effect" style="min-height: 220px;">
+    <div class="row g-0 h-100">
 
-    <div class="card-body d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-1">@Model.Name</h5>
-            <span class="badge bg-secondary">@cat</span>
+        <div class="col-md-4 position-relative">
+            <img src="@imagePath"
+                 class="img-fluid w-100 h-100 object-fit-cover"
+                 style="min-height: 220px;"
+                 alt="@Model.Name"
+                 onerror="this.onerror=null;this.src='/images/nature.jpg';">
+
+            <div class="position-absolute top-0 start-0 m-3">
+                <span class="badge bg-white text-dark shadow-sm rounded-pill px-2 py-1 small">
+                    @{
+                        var catName = (Model.Category?.Name ?? "").ToLower();
+                        var icon = "✨";
+
+                        // Supports both Turkish and English keywords for icons
+                        if (catName.Contains("doğa") || catName.Contains("nature")) { icon = "🏔️"; }
+                        else if (catName.Contains("tarih") || catName.Contains("history")) { icon = "🏛️"; }
+                        else if (catName.Contains("kültür") || catName.Contains("culture")) { icon = "🎭"; }
+                    }
+                    @icon @(Model.Category?.Name ?? "General")
+                </span>
+            </div>
         </div>
 
-        <div class="text-muted small mb-2">📍 @city</div>
+        <div class="col-md-8">
+            <div class="card-body p-3 p-md-4 d-flex flex-column h-100">
 
-        @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
-        {
-            <p class="card-text text-muted" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
-                @Model.ShortDescription
-            </p>
-        }
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="text-uppercase text-primary fw-bold small mb-1" style="letter-spacing: 1px; font-size: 0.75rem;">
+                            <i class="bi bi-geo-alt-fill me-1"></i> @(Model.City?.Name ?? "Kyrgyzstan")
+                        </div>
+                        <h4 class="card-title fw-bold text-dark mb-0">@Model.Name</h4>
+                    </div>
+                </div>
 
-        <div class="mt-auto">
-            <a class="btn btn-outline-dark btn-sm"
-               asp-controller="Place" asp-action="Detail" asp-route-slug="@Model.Slug">
-                View details →
-            </a>
+                <p class="card-text text-muted small text-truncate-3 flex-grow-1 mb-3">
+                    @Model.Description
+                </p>
+
+                <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-auto">
+                    <div class="text-muted small d-none d-lg-block">
+                        @if (Model.GetType().GetProperty("BestTimeToVisit") != null)
+                        {
+                            <span class="me-3"><i class="bi bi-calendar-check me-1"></i> @Model.GetType().GetProperty("BestTimeToVisit")?.GetValue(Model, null)</span>
+                        }
+                    </div>
+
+                    <a href="/Place/Details/@Model.Id" class="btn btn-dark rounded-pill px-4 btn-sm fw-semibold stretched-link ms-auto">
+                        View Details <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .hover-card-effect {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hover-card-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        }
+
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

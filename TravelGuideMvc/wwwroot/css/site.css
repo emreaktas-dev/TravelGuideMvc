@@ -1,87 +1,129 @@
+/* =========================================
+   1. TEMEL AYARLAR & STICKY FOOTER (DOÐRU)
+   ========================================= */
+
 html {
-  font-size: 14px;
+    font-size: 14px;
+    height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Main alan sayfayý doldurur */
+main {
+    flex-grow: 1;
+    width: 100%;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Footer ASLA fixed/absolute deðil */
+.app-footer {
+    position: static;
+    width: 100%;
+    background-color: #f8f9fa;
 }
+
+/* =========================================
+   2. BOOTSTRAP OVERRIDES
+   ========================================= */
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #00bcd4;
+}
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* =========================================
+   3. GENEL KART STÝLLERÝ
+   ========================================= */
 
 .card {
-    transition: 0.15s ease;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
 }
 
-   .card:hover {
-        transform: translateY(-2px);
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
     }
 
-/* Sayakat Home Page Styles */
+/* =========================================
+   4. HOME (LANDING PAGE)
+   ========================================= */
+
 .hero-section {
-    background: linear-gradient(to right, rgba(0, 35, 50, 0.8), rgba(0, 35, 50, 0.4)), url('https://images.unsplash.com/photo-1526779259212-6d91b54a9b22?auto=format&fit=crop&w=1920&q=80');
+    background: linear-gradient( to right, rgba(0, 35, 50, 0.85), rgba(0, 35, 50, 0.4) ), url('/images/nature.jpg');
     background-size: cover;
     background-position: center;
     color: white;
-    border-radius: 1rem;
-    padding: 4rem 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 1.25rem;
+    padding: 4rem 2.5rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
     margin-bottom: 3rem;
 }
 
+.btn-hero {
+    padding: 0.8rem 2.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-hero:hover {
+        transform: translateY(-2px);
+    }
+
 .feature-card {
-    transition: all 0.3s ease;
     border: none;
-    border-radius: 1rem;
+    border-radius: 1.25rem;
     background: #fff;
-    overflow: hidden;
+    transition: all 0.25s ease;
 }
 
     .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        transform: translateY(-8px);
+        box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
     }
 
 .icon-box {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 1rem;
 }
 
-.btn-hero {
-    padding: 0.8rem 2rem;
-    border-radius: 50px;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-/* Renk Sýnýflarý */
 .bg-icon-primary {
     background-color: #e3f2fd;
     color: #0d6efd;
@@ -95,4 +137,129 @@ body {
 .bg-icon-warning {
     background-color: #fff3e0;
     color: #ff9800;
+}
+
+/* =========================================
+   5. EXPLORE
+   ========================================= */
+
+.explore-hero {
+    background: linear-gradient( to right, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15) ), url('/images/explore.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 1.25rem;
+    padding: 3rem 2rem;
+    color: white;
+    margin-bottom: 2.5rem;
+}
+
+.place-card img {
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 1.25rem;
+    border-top-right-radius: 1.25rem;
+}
+
+.place-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.badge-category {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   6. PLACE DETAIL
+   ========================================= */
+
+.place-gallery img {
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease;
+}
+
+    .place-gallery img:hover {
+        transform: scale(1.03);
+    }
+
+/* =========================================
+   7. NEARBY
+   ========================================= */
+
+.nearby-card {
+    border-radius: 1rem;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+    .nearby-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 25px rgba(0, 0, 0, 0.1);
+    }
+
+/* =========================================
+   8. EMERGENCY
+   ========================================= */
+
+.emergency-card {
+    border-radius: 1.25rem;
+    background-color: #fff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .emergency-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 30px rgba(0, 0, 0, 0.12);
+    }
+
+.phone-display {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #2c3e50;
+}
+
+.btn-call {
+    border-radius: 50px;
+    padding: 0.65rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+    .btn-call:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 18px rgba(220, 53, 69, 0.4);
+    }
+
+/* =========================================
+   9. CURRENCY
+   ========================================= */
+
+.currency-box {
+    background-color: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.currency-rate {
+    font-weight: 600;
+}
+
+/* =========================================
+   10. RESPONSIVE
+   ========================================= */
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+    }
+
+    .btn-hero {
+        width: 100%;
+        justify-content: center;
+    }
 }
