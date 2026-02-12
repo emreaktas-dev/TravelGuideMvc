@@ -1,0 +1,71 @@
+@model TravelGuideMvc.Models.Place
+
+@{
+    var imageName = Model.Name + ".jpg";
+    var imagePath = "/images/" + imageName;
+}
+
+<div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-lift-lg">
+    <div class="position-relative">
+        <img src="@imagePath"
+             class="card-img-top object-fit-cover"
+             style="height: 250px;"
+             alt="@Model.Name"
+             onerror="this.onerror=null;this.src='/images/nature.jpg';">
+        
+        <div class="position-absolute top-0 end-0 m-3">
+             <span class="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 fw-semibold">
+                @{
+                    var catName = (Model.Category?.Name ?? "").ToLower();
+                    var icon = "✨";
+
+                    if (catName.Contains("doğa") || catName.Contains("nature")) { icon = "🏔️"; }
+                    else if (catName.Contains("tarih") || catName.Contains("history")) { icon = "🏛️"; }
+                    else if (catName.Contains("kültür") || catName.Contains("culture")) { icon = "🎭"; }
+                }
+                @icon @(Model.Category?.Name ?? "General")
+            </span>
+        </div>
+    </div>
+
+    <div class="card-body p-4 d-flex flex-column">
+        <div class="mb-3">
+            <div class="text-uppercase text-primary fw-bold small mb-1 ls-1">
+                <i class="bi bi-geo-alt-fill me-1"></i> @(Model.City?.Name ?? "Kyrgyzstan")
+            </div>
+            <h4 class="card-title fw-bold text-dark mb-2">@Model.Name</h4>
+        </div>
+
+        <p class="card-text text-muted mb-4 small flex-grow-1 text-truncate-3">
+            @Model.Description
+        </p>
+
+        <div class="mt-auto">
+             <a href="/Place/@Model.Slug" class="btn btn-outline-dark rounded-pill w-100 fw-bold stretched-link">
+                Explore Details <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift-lg {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    }
+    
+    .hover-lift-lg:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+    }
+
+    .ls-1 {
+        letter-spacing: 1px;
+    }
+    
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

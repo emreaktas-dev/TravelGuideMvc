@@ -1,9 +1,12 @@
 ﻿@model TravelGuideMvc.ViewModels.PlaceDetailVm
 @using System.Globalization
 @using TravelGuideMvc.ViewModels
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
 @{
     var p = Model.Place;
+    ViewData["Title"] = p.Name;
 
     // Google Maps'in doğru okuması için nokta (.) ile formatla
     var lat = p.Latitude.ToString(CultureInfo.InvariantCulture);
@@ -18,112 +21,364 @@
         var km = meters / 1000.0;
         return $"{km:0.#} km";
     }
+
+    // Hero image logic: Use first image or fallback
+    var heroImage = (p.Images != null && p.Images.Any()) 
+        ? p.Images.OrderBy(x => x.Order).First().Url 
+        : "/images/nature.jpg";
 }
 
-<h1>@p.Name</h1>
+<style>
+    /* --- HERO SECTION --- */
+    .place-hero {
+        position: relative;
+        height: 60vh;
+        min-height: 400px;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('@heroImage');
+        background-size: cover;
+        background-position: center;
+        border-radius: 0 0 3rem 3rem;
+        margin-bottom: -4rem; /* Content overlap */
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 6rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
 
-<p style="color: gray;">
-    City: <strong>@p.City?.Name</strong> |
-    Category: <strong>@p.Category?.Name</strong>
-</p>
+    .place-title {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
 
-@if (!string.IsNullOrWhiteSpace(p.ShortDescription))
-{
-    <p><em>@p.ShortDescription</em></p>
-}
+    /* --- CONTENT CARDS --- */
+    .content-card {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+    }
 
-@if (!string.IsNullOrWhiteSpace(p.Description))
-{
-    <p>@p.Description</p>
-}
+    .sidebar-card {
+        background: white;
+        border-radius: 1.2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: 1px solid #f0f0f0;
+    }
 
-<hr />
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(0, 128, 128, 0.1);
+        color: #008080;
+        font-size: 1.2rem;
+    }
 
-<h3>Location</h3>
+    .gallery-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 1rem;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
 
-@if (!string.IsNullOrWhiteSpace(p.Address))
-{
-    <p><strong>Address:</strong> @p.Address</p>
-}
+    .gallery-img:hover {
+        transform: scale(1.02);
+    }
 
-<p>
-    <strong>Coordinates:</strong> @p.Latitude, @p.Longitude
-    |
-    <a href="@mapsUrl" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
-    |
-    <a href="@directionsUrl" target="_blank" rel="noopener noreferrer">Get Directions</a>
-</p>
+    .radius-select {
+        border: 1px solid #dee2e6;
+        border-radius: 0.8rem;
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        font-weight: 500;
+        cursor: pointer;
+    }
 
-@if (!string.IsNullOrWhiteSpace(p.OpeningHours) ||
-     !string.IsNullOrWhiteSpace(p.PriceInfo) ||
-     !string.IsNullOrWhiteSpace(p.BestTimeToVisit))
-{
-    <hr />
-    <h3>Info</h3>
-    <ul>
-        @if (!string.IsNullOrWhiteSpace(p.OpeningHours))
-        {
-            <li><strong>Opening hours:</strong> @p.OpeningHours</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(p.PriceInfo))
-        {
-            <li><strong>Price:</strong> @p.PriceInfo</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(p.BestTimeToVisit))
-        {
-            <li><strong>Best time:</strong> @p.BestTimeToVisit</li>
-        }
-    </ul>
-}
+    .btn-action {
+        border-radius: 0.8rem;
+        padding: 0.8rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
 
-@if (p.Images != null && p.Images.Any())
-{
-    <hr />
-    <h3>Photos</h3>
-
-    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        @foreach (var img in p.Images.OrderBy(x => x.Order))
-        {
-            <img src="@img.Url"
-                 alt="photo"
-                 style="width:260px; height:170px; object-fit:cover; border:1px solid #ddd; border-radius:10px;" />
-        }
+<!-- HERO SECTION -->
+<div class="container-fluid p-0">
+    <div class="place-hero">
+        <div class="container">
+            <div class="d-flex flex-column align-items-start">
+                <div class="d-flex gap-2 mb-3">
+                    @if (p.City != null)
+                    {
+                        <span class="badge bg-white text-dark rounded-pill px-3 py-2 shadow-sm">
+                            <i class="bi bi-geo-alt-fill me-1 text-danger"></i> @p.City.Name
+                        </span>
+                    }
+                    @if (p.Category != null)
+                    {
+                        <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">
+                            <i class="bi bi-tag-fill me-1"></i> @p.Category.Name
+                        </span>
+                    }
+                </div>
+                <h1 class="display-3 fw-bold text-white place-title mb-2">@p.Name</h1>
+                @if (!string.IsNullOrWhiteSpace(p.ShortDescription))
+                {
+                    <p class="lead text-white-50 fs-5 mb-0" style="max-width: 800px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                        @p.ShortDescription
+                    </p>
+                }
+            </div>
+        </div>
     </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container pb-5" style="position: relative; z-index: 10;">
+    <div class="row g-4">
+        
+        <!-- LEFT COLUMN: Description, Gallery, Location -->
+        <div class="col-lg-8">
+            <!-- Description Card -->
+            <div class="content-card p-4 p-md-5 mb-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="info-icon me-3">
+                        <i class="bi bi-card-text"></i>
+                    </div>
+                    <h3 class="fw-bold m-0">About</h3>
+                </div>
+                
+                @if (!string.IsNullOrWhiteSpace(p.Description))
+                {
+                    <div class="text-muted fs-5 lh-lg">
+                        @Html.Raw(p.Description.Replace("\n", "<br>"))
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No detailed description available.</p>
+                }
+            </div>
+
+            <!-- Gallery -->
+            @if (p.Images != null && p.Images.Any())
+            {
+                <div class="mb-4">
+                    <h4 class="fw-bold mb-3 ms-2"><i class="bi bi-images me-2 text-primary"></i>Photo Gallery</h4>
+                    <div class="row g-3">
+                        @foreach (var img in p.Images.OrderBy(x => x.Order))
+                        {
+                            <div class="col-md-6">
+                                <img src="@img.Url" class="gallery-img shadow-sm" alt="@p.Name Photo" loading="lazy" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Location & Map -->
+            <div class="content-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="info-icon me-3 bg-danger-subtle text-danger">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <h3 class="fw-bold m-0">Location</h3>
+                    </div>
+                    <div>
+                         <a href="@directionsUrl" target="_blank" class="btn btn-outline-primary btn-action btn-sm">
+                            <i class="bi bi-cursor-fill me-1"></i> Get Directions
+                        </a>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(p.Address))
+                {
+                    <p class="mb-3"><i class="bi bi-pin-map me-2 text-muted"></i>@p.Address</p>
+                }
+                
+                <!-- Map Container -->
+                <div id="map" class="rounded-3 shadow-sm border" style="height: 350px; width: 100%; z-index: 1;"></div>
+                
+                <div class="mt-3 text-muted small d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle"></i> Coordinates: <span class="font-monospace">@p.Latitude, @p.Longitude</span>
+                </div>
+            </div>
+
+            <!-- Nearby Services -->
+            <div class="mt-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="fw-bold m-0">What's Nearby?</h3>
+                    
+                    <!-- Radius Selector -->
+                    <form method="get" asp-controller="Place" asp-action="Detail" asp-route-slug="@Model.Place.Slug">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted small">Radius</span>
+                            <select name="radius" onchange="this.form.submit()" class="form-select border-start-0 radius-select py-1">
+                                <option value="2000" selected="@(Model.RadiusMeters == 2000)">2 km (Walk)</option>
+                                <option value="5000" selected="@(Model.RadiusMeters == 5000)">5 km (Drive)</option>
+                                <option value="10000" selected="@(Model.RadiusMeters == 10000)">10 km</option>
+                                <option value="50000" selected="@(Model.RadiusMeters == 50000)">50 km (Region)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="row g-4">
+                    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hotels", Icon = "🏨", ShowPhone = true, Items = Model.NearbyHotels })
+                    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Restaurants", Icon = "🍽️", ShowPhone = true, Items = Model.NearbyRestaurants })
+                    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hospitals", Icon = "🏥", ShowPhone = true, Items = Model.NearbyHospitals })
+                    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "ATMs", Icon = "🏧", ShowPhone = false, Items = Model.NearbyATMs })
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Sidebar (Info) -->
+        <div class="col-lg-4">
+            <div class="sidebar-card p-4 position-sticky" style="top: 2rem;">
+                <h4 class="fw-bold mb-4 border-bottom pb-3">Essential Info</h4>
+
+                <div class="d-flex flex-column gap-4">
+                    <!-- Opening Hours -->
+                    <div class="d-flex gap-3">
+                        <div class="text-primary fs-4"><i class="bi bi-clock"></i></div>
+                        <div>
+                            <div class="fw-bold small text-uppercase text-muted">Opening Hours</div>
+                            <div class="fw-semibold text-dark">
+                                @(!string.IsNullOrWhiteSpace(p.OpeningHours) ? p.OpeningHours : "Not specified")
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="d-flex gap-3">
+                        <div class="text-success fs-4"><i class="bi bi-cash-coin"></i></div>
+                        <div>
+                            <div class="fw-bold small text-uppercase text-muted">Price / Entry</div>
+                            <div class="fw-semibold text-dark">
+                                @(!string.IsNullOrWhiteSpace(p.PriceInfo) ? p.PriceInfo : "Free / Public Access")
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Best Time -->
+                    <div class="d-flex gap-3">
+                        <div class="text-warning fs-4"><i class="bi bi-sun"></i></div>
+                        <div>
+                            <div class="fw-bold small text-uppercase text-muted">Best Time to Visit</div>
+                            <div class="fw-semibold text-dark">
+                                @(!string.IsNullOrWhiteSpace(p.BestTimeToVisit) ? p.BestTimeToVisit : "Year-round")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                    <a href="@mapsUrl" target="_blank" class="btn btn-dark w-100 btn-action rounded-pill shadow-sm">
+                        <i class="bi bi-map-fill me-2"></i> Open in Maps
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+@{
+    var options = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
+
+    // Helper to safely serialize
+    string SerializePoints(IEnumerable<TravelGuideMvc.Models.ServicePoint>? points)
+    {
+        if (points == null) return "[]";
+        // Select only needed fields to keep payload small
+        var simplified = points.Select(x => new { x.Name, x.Latitude, x.Longitude, Type = x.Type.ToString() });
+        return System.Text.Json.JsonSerializer.Serialize(simplified, options);
+    }
 }
 
-<hr />
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data for nearby places
+        var nearbyData = {
+            hotels: @Html.Raw(SerializePoints(Model.NearbyHotels)),
+            restaurants: @Html.Raw(SerializePoints(Model.NearbyRestaurants)),
+            hospitals: @Html.Raw(SerializePoints(Model.NearbyHospitals)),
+            atms: @Html.Raw(SerializePoints(Model.NearbyATMs))
+        };
 
-<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <h3 style="margin:0;">Nearby</h3>
+        // Initialize Map
+        var map = L.map('map').setView([@lat, @lng], 13);
 
-    <!-- Radius seçimi -->
-    <form method="get"
-          asp-controller="Place"
-          asp-action="Detail"
-          asp-route-slug="@Model.Place.Slug"
-          style="display:flex; align-items:center; gap:8px;">
-        <label style="font-weight:600;">Radius:</label>
+        // Add Tiles (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-        <select name="radius" onchange="this.form.submit()" style="padding:6px 10px;">
-            <option value="2000" selected="@(Model.RadiusMeters == 2000)">2 km</option>
-            <option value="5000" selected="@(Model.RadiusMeters == 5000)">5 km</option>
-            <option value="10000" selected="@(Model.RadiusMeters == 10000)">10 km</option>
-            <option value="50000" selected="@(Model.RadiusMeters == 50000)">50 km</option>
-        </select>
+        // Colors for each type
+        var colors = {
+            'Hotel': '#0d6efd',      // Blue
+            'Restaurant': '#fd7e14', // Orange
+            'Hospital': '#dc3545',   // Red
+            'ATM': '#198754'         // Green
+        };
 
-        <noscript>
-            <button type="submit">Apply</button>
-        </noscript>
-    </form>
-</div>
+        // Function to add markers
+        function addMarkers(list, typeLabel) {
+            if (!list || list.length === 0) return;
+            
+            list.forEach(function(item) {
+                var color = colors[item.type] || '#6c757d'; // Default gray
+                
+                L.circleMarker([item.latitude, item.longitude], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                })
+                .addTo(map)
+                .bindPopup('<b>' + item.name + '</b><br><span class="badge" style="background-color:' + color + '">' + item.type + '</span>');
+            });
+        }
 
-<p style="color:gray; margin-top:6px;">
-    Showing results within <strong>@FormatDistance(Model.RadiusMeters)</strong> of this place.
-</p>
+        // Add Main Place Marker (Star Icon or Bigger Marker)
+        var mainIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
-<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
-    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hotels", Icon = "🏨", ShowPhone = true, Items = Model.NearbyHotels })
-    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Restaurants", Icon = "🍽️", ShowPhone = true, Items = Model.NearbyRestaurants })
-    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "Hospitals", Icon = "🏥", ShowPhone = true, Items = Model.NearbyHospitals })
-    @await Html.PartialAsync("_NearbyCard", new NearbyCardVm { Title = "ATMs", Icon = "🏧", ShowPhone = false, Items = Model.NearbyATMs })
-</div>
+        L.marker([@lat, @lng], {icon: mainIcon}).addTo(map)
+            .bindPopup('<div class="text-center fw-bold fs-6">@p.Name</div>')
+            .openPopup();
+
+        // Add Nearby Markers
+        addMarkers(nearbyData.hotels, 'Hotel');
+        addMarkers(nearbyData.restaurants, 'Restaurant');
+        addMarkers(nearbyData.hospitals, 'Hospital');
+        addMarkers(nearbyData.atms, 'ATM');
+    });
+</script>

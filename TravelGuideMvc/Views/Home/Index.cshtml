@@ -16,20 +16,20 @@
     }
 
     /* --- BÖLÜM 1: GRİ HERO ALANI (Kompakt) --- */
+    /* --- BÖLÜM 1: HERO ALANI (Explore Style) --- */
     .hero-wrapper-gray {
         position: relative;
-        /* Siyah-beyaz filtre ve koyu gradyan */
-        background: linear-gradient(to bottom, rgba(33, 37, 41, 0.85), rgba(33, 37, 41, 0.5)), url('@heroImage');
+        /* Explore sayfasındaki gradyan ve stil */
+        background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.4)), url('@heroImage');
         background-size: cover;
         background-position: center;
-        /* Yükseklik azaltıldı */
-        padding: 4rem 1rem 6rem 1rem;
-        border-radius: 0 0 2rem 2rem;
+        /* Yükseklik ve padding standart */
+        padding: 6rem 1rem 8rem 1rem;
+        border-radius: 0 0 2.5rem 2.5rem;
         color: white;
         margin-bottom: 4rem;
-        /* Resme gri efekt uygula */
-        filter: grayscale(100%);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        /* Grayscale kaldırıldı */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
 
     .btn-gray {
@@ -294,7 +294,7 @@
                     // HER BİR KART ÖĞESİ (Sabit genişlikte)
                     <div class="scrolling-card-item">
                         @* Mevcut _PlaceCard partial'ını kullanıyoruz *@
-                        @await Html.PartialAsync("_PlaceCard", place)
+                        @await Html.PartialAsync("_PlaceCardVertical", place)
                     </div>
                 }
             </div>
